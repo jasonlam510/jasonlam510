@@ -1,0 +1,79 @@
+{
+  "about": {
+    "body": {
+      "first": "這個作品集結合了 Apple 式的克制美學與高端數據產品的隱藏結構邏輯。天空一開始像隨機星場，只有當游標進入正確軌道時，群組化的資訊才會浮現。",
+      "second": "在底層實作上，畫布把背景粒子與星座狀態分開管理，讓探索過程保持流暢，同時以有節奏的透明度、光暈與標籤轉場維持高級感。"
+    },
+    "eyebrow": "簡介",
+    "title": "以產品系統方式構建，以私人天文台的節奏呈現。"
+  },
+  "constellations": {
+    "gemini": "雙子座",
+    "leo": "獅子座",
+    "taurus": "金牛座"
+  },
+  "contact": {
+    "emailLabel": "電郵",
+    "eyebrow": "聯絡",
+    "focusLabel": "專注範圍",
+    "focusValue": "創意方向、前端架構、國際化產品介面，以及電影感數據體驗。",
+    "title": "可合作於有野心的品牌世界、高端工具與沉浸式產品介面。"
+  },
+  "controls": {
+    "language": "語言",
+    "themeOptions": {
+      "dark": "深色",
+      "light": "淺色"
+    },
+    "themeSwitch": {
+      "dark": "切換到深色主題",
+      "light": "切換到淺色主題"
+    }
+  },
+  "hero": {
+    "description": "這是一個以 Vite+ 工作流構建的高級單頁作品集，結合隱藏星座探索、互動粒子、雙語內容，以及有文件依據的深淺色主題系統。",
+    "eyebrow": "創意前端工程師",
+    "meta": {
+      "location": "香港 / 遠端",
+      "prompt": "在星空中移動，讓星座自行浮現。",
+      "stack": "React、Canvas、i18next、Vite+"
+    },
+    "title": "把隱藏星座放進具有電影感的個人作品集。"
+  },
+  "projects": {
+    "cards": {
+      "designEngine": {
+        "description": "為多語產品團隊打造可重用的動效基元、主題 token 與精緻界面表層。",
+        "tag": "前端",
+        "title": "Design Engine"
+      },
+      "executiveOs": {
+        "description": "一個以信心、速度與高壓下可讀性為核心的高層操作介面。",
+        "tag": "產品",
+        "title": "Executive OS"
+      },
+      "hiddenZodiac": {
+        "description": "透過空間分組、質心距離觸發與插值透明度狀態，讓星座逐步顯現。",
+        "tag": "作品集",
+        "title": "Hidden Zodiac"
+      },
+      "macroPulse": {
+        "description": "把敘事、宏觀訊號與動態節奏視為同一套系統的市場情報概念。",
+        "tag": "數據敘事",
+        "title": "Macro Pulse Terminal"
+      },
+      "quantAtlas": {
+        "description": "用編輯式視覺化方式探索曝險、波動與市場 regime 轉換的空間概念。",
+        "tag": "研究",
+        "title": "Quant Atlas"
+      },
+      "signalField": {
+        "description": "把粒子排斥、視差漂移與 HUD 式光暈整合成高回應性的互動場域。",
+        "tag": "創意編碼",
+        "title": "Signal Field"
+      }
+    },
+    "eyebrow": "精選項目",
+    "title": "為訊號、氛圍與探索而設計的視覺系統。"
+  }
+}

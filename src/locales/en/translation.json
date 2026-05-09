@@ -1,0 +1,79 @@
+{
+  "about": {
+    "body": {
+      "first": "This portfolio blends Apple-style restraint with the hidden-structure logic of premium data products. The field looks ambient at first, then reveals grouped intelligence only when the cursor enters the right orbit.",
+      "second": "Under the surface, the canvas keeps background particles separate from zodiac state, so discovery stays smooth while opacity, glow, and labeling transition with deliberate pacing."
+    },
+    "eyebrow": "Profile",
+    "title": "Built like a product system, staged like a private observatory."
+  },
+  "constellations": {
+    "gemini": "Gemini",
+    "leo": "Leo",
+    "taurus": "Taurus"
+  },
+  "contact": {
+    "emailLabel": "Email",
+    "eyebrow": "Contact",
+    "focusLabel": "Focus",
+    "focusValue": "Creative direction, frontend architecture, internationalized product interfaces, and cinematic data experiences.",
+    "title": "Available for ambitious brand worlds, premium tools, and immersive product surfaces."
+  },
+  "controls": {
+    "language": "Language",
+    "themeOptions": {
+      "dark": "Dark",
+      "light": "Light"
+    },
+    "themeSwitch": {
+      "dark": "Switch to dark theme",
+      "light": "Switch to light theme"
+    }
+  },
+  "hero": {
+    "description": "A premium, single-page portfolio with hidden zodiac discovery, reactive particles, bilingual content, and documented dark or light theming built on a Vite+ workflow.",
+    "eyebrow": "Creative Frontend Engineer",
+    "meta": {
+      "location": "Hong Kong / Remote",
+      "prompt": "Move through the sky to surface the constellations.",
+      "stack": "React, Canvas, i18next, Vite+"
+    },
+    "title": "Hidden constellations inside a cinematic personal portfolio."
+  },
+  "projects": {
+    "cards": {
+      "designEngine": {
+        "description": "Reusable motion primitives, theme tokens, and polished surfaces tuned for multilingual product teams.",
+        "tag": "Frontend",
+        "title": "Design Engine"
+      },
+      "executiveOs": {
+        "description": "An executive command surface organized for confidence, pace, and readability under pressure.",
+        "tag": "Product",
+        "title": "Executive OS"
+      },
+      "hiddenZodiac": {
+        "description": "Constellations reveal themselves through spatial grouping, center-of-mass proximity, and lerped opacity states.",
+        "tag": "Portfolio",
+        "title": "Hidden Zodiac"
+      },
+      "macroPulse": {
+        "description": "A market intelligence concept that treats narrative, macro signals, and motion pacing as one system.",
+        "tag": "Data Narrative",
+        "title": "Macro Pulse Terminal"
+      },
+      "quantAtlas": {
+        "description": "A spatial exploration of exposure, volatility, and regime shifts expressed through editorial visualization.",
+        "tag": "Research",
+        "title": "Quant Atlas"
+      },
+      "signalField": {
+        "description": "Particle repulsion, parallax drift, and HUD-style glow combined into a responsive interaction field.",
+        "tag": "Creative Code",
+        "title": "Signal Field"
+      }
+    },
+    "eyebrow": "Selected Projects",
+    "title": "Visual systems shaped for signal, atmosphere, and discovery."
+  }
+}
