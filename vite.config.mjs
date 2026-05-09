@@ -3,6 +3,9 @@ import { defineConfig } from "vite-plus";
 
 export default defineConfig({
   plugins: [react()],
+  server: {
+    host: true,
+  },
   fmt: {},
   lint: {
     ignorePatterns: ["dist/**"],
