@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import { siteContent } from "../content/siteContent";
 import {
   bodyTextClass,
   cardClass,
@@ -10,43 +10,42 @@ import {
 } from "./sectionStyles";
 
 export function ProjectsSection() {
-  const { t } = useTranslation();
   const projectCards = [
     {
       className: "bento-wide",
-      description: t("projects.cards.macroPulse.description"),
-      tag: t("projects.cards.macroPulse.tag"),
-      title: t("projects.cards.macroPulse.title"),
+      description: siteContent.projects.cards.macroPulse.description,
+      tag: siteContent.projects.cards.macroPulse.tag,
+      title: siteContent.projects.cards.macroPulse.title,
     },
     {
       className: "",
-      description: t("projects.cards.hiddenZodiac.description"),
-      tag: t("projects.cards.hiddenZodiac.tag"),
-      title: t("projects.cards.hiddenZodiac.title"),
+      description: siteContent.projects.cards.hiddenZodiac.description,
+      tag: siteContent.projects.cards.hiddenZodiac.tag,
+      title: siteContent.projects.cards.hiddenZodiac.title,
     },
     {
       className: "",
-      description: t("projects.cards.signalField.description"),
-      tag: t("projects.cards.signalField.tag"),
-      title: t("projects.cards.signalField.title"),
+      description: siteContent.projects.cards.signalField.description,
+      tag: siteContent.projects.cards.signalField.tag,
+      title: siteContent.projects.cards.signalField.title,
     },
     {
       className: "bento-tall",
-      description: t("projects.cards.executiveOs.description"),
-      tag: t("projects.cards.executiveOs.tag"),
-      title: t("projects.cards.executiveOs.title"),
+      description: siteContent.projects.cards.executiveOs.description,
+      tag: siteContent.projects.cards.executiveOs.tag,
+      title: siteContent.projects.cards.executiveOs.title,
     },
     {
       className: "",
-      description: t("projects.cards.designEngine.description"),
-      tag: t("projects.cards.designEngine.tag"),
-      title: t("projects.cards.designEngine.title"),
+      description: siteContent.projects.cards.designEngine.description,
+      tag: siteContent.projects.cards.designEngine.tag,
+      title: siteContent.projects.cards.designEngine.title,
     },
     {
       className: "bento-wide",
-      description: t("projects.cards.quantAtlas.description"),
-      tag: t("projects.cards.quantAtlas.tag"),
-      title: t("projects.cards.quantAtlas.title"),
+      description: siteContent.projects.cards.quantAtlas.description,
+      tag: siteContent.projects.cards.quantAtlas.tag,
+      title: siteContent.projects.cards.quantAtlas.title,
     },
   ];
 
@@ -54,8 +53,8 @@ export function ProjectsSection() {
     <section className={`${panelClass} panel-surface`} id="projects">
       <div className={panelInnerClass}>
         <div className={revealClass}>
-          <p className={eyebrowClass}>{t("projects.eyebrow")}</p>
-          <h2 className={headingClass}>{t("projects.title")}</h2>
+          <p className={eyebrowClass}>{siteContent.projects.eyebrow}</p>
+          <h2 className={headingClass}>{siteContent.projects.title}</h2>
         </div>
 
         <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">

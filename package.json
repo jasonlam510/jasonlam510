@@ -3,23 +3,15 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "scripts": {
-    "i18n:extract": "i18next-cli extract",
-    "i18n:extract:ci": "i18next-cli extract --ci"
-  },
   "dependencies": {
-    "i18next": "^26.0.8",
-    "i18next-browser-languagedetector": "^8.2.1",
     "react": "19.2.6",
-    "react-dom": "19.2.6",
-    "react-i18next": "^17.0.6"
+    "react-dom": "19.2.6"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
-    "i18next-cli": "^1.56.9",
     "tailwindcss": "^4.3.0",
     "typescript": "~6.0.2",
     "vite": "catalog:",
