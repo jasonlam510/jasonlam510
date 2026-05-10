@@ -8,8 +8,7 @@ The page combines:
 
 - An Apple-like premium visual language
 - A hedge-fund or terminal-inspired data-visualization mood
-- A full-screen interactive canvas starfield
-- Hidden zodiac constellations that reveal on cursor proximity
+- A full-screen interactive canvas aurora
 - Bilingual content with `react-i18next`
 - User-selectable `system` / `light` / `dark` theme behavior
 
@@ -28,12 +27,10 @@ Key interactive behaviors:
 
 - CSS scroll snapping between sections
 - Intersection Observer reveal animations for text and cards
-- Canvas-based starfield with ambient particles
-- Cursor repulsion for nearby stars
-- Hidden zodiac groups that activate by proximity to each constellation center
-- Lerp-based fade transitions for constellation stars, lines, and labels
+- Canvas-based aurora with flowing light bands
+- Hover-based brightening and gentle ribbon bending
 - Canvas fade-out while scrolling into section 2 for readability
-- Responsive star count reduction on smaller screens
+- Responsive ribbon count reduction on smaller screens
 
 ## Tech Stack
 
@@ -41,28 +38,28 @@ Key interactive behaviors:
 - React 19
 - TypeScript
 - Vite React plugin
-- Canvas 2D API for starfield rendering
+- Canvas 2D API for aurora rendering
 - `i18next`, `react-i18next`, `i18next-browser-languagedetector`
 - `i18next-cli` for extraction validation
-- Plain CSS in one app stylesheet
+- Tailwind CSS via `@tailwindcss/vite`
+- Thin global CSS for theme tokens, canvas, and motion states
 - `pnpm` as the package manager managed through Vite+
 
 ## Project Structure
 
-- [index.html](/Users/jason/Github/Me/fun/index.html): app entry HTML and early theme bootstrap
-- [vite.config.mjs](/Users/jason/Github/Me/fun/vite.config.mjs): Vite+ config, React plugin, lint/fmt behavior
-- [i18next.config.ts](/Users/jason/Github/Me/fun/i18next.config.ts): extraction config for translation catalogs
-- [src/main.tsx](/Users/jason/Github/Me/fun/src/main.tsx): React bootstrap
-- [src/App.tsx](/Users/jason/Github/Me/fun/src/App.tsx): page composition and section layout
-- [src/styles.css](/Users/jason/Github/Me/fun/src/styles.css): global visual system, layout, theming, motion states
-- [src/i18n.ts](/Users/jason/Github/Me/fun/src/i18n.ts): i18n initialization and language detection
-- [src/components/LanguageSwitcher.tsx](/Users/jason/Github/Me/fun/src/components/LanguageSwitcher.tsx): locale switch UI
-- [src/components/ThemeSwitcher.tsx](/Users/jason/Github/Me/fun/src/components/ThemeSwitcher.tsx): theme switch UI
-- [src/components/StarfieldCanvas.tsx](/Users/jason/Github/Me/fun/src/components/StarfieldCanvas.tsx): canvas engine and hidden-zodiac behavior
-- [src/data/zodiac.ts](/Users/jason/Github/Me/fun/src/data/zodiac.ts): zodiac geometry and connection data
-- [src/hooks/useThemePreference.ts](/Users/jason/Github/Me/fun/src/hooks/useThemePreference.ts): theme persistence and resolution
-- [src/locales/en/translation.json](/Users/jason/Github/Me/fun/src/locales/en/translation.json): English strings
-- [src/locales/zh-HK/translation.json](/Users/jason/Github/Me/fun/src/locales/zh-HK/translation.json): Traditional Chinese strings
+- [index.html](/Users/jason/Github/Me/profolio/index.html): app entry HTML and early theme bootstrap
+- [vite.config.mjs](/Users/jason/Github/Me/profolio/vite.config.mjs): Vite+ config, React plugin, Tailwind Vite plugin, lint/fmt behavior
+- [i18next.config.ts](/Users/jason/Github/Me/profolio/i18next.config.ts): extraction config for translation catalogs
+- [src/main.tsx](/Users/jason/Github/Me/profolio/src/main.tsx): React bootstrap
+- [src/App.tsx](/Users/jason/Github/Me/profolio/src/App.tsx): page composition and Tailwind-driven section layout
+- [src/styles.css](/Users/jason/Github/Me/profolio/src/styles.css): Tailwind entry file plus global theme tokens, canvas, and reveal states
+- [src/i18n.ts](/Users/jason/Github/Me/profolio/src/i18n.ts): i18n initialization and language detection
+- [src/components/LanguageSwitcher.tsx](/Users/jason/Github/Me/profolio/src/components/LanguageSwitcher.tsx): locale switch UI
+- [src/components/ThemeSwitcher.tsx](/Users/jason/Github/Me/profolio/src/components/ThemeSwitcher.tsx): theme switch UI
+- [src/components/StarfieldCanvas.tsx](/Users/jason/Github/Me/profolio/src/components/StarfieldCanvas.tsx): canvas aurora renderer and interaction logic
+- [src/hooks/useThemePreference.ts](/Users/jason/Github/Me/profolio/src/hooks/useThemePreference.ts): theme persistence and resolution
+- [src/locales/en/translation.json](/Users/jason/Github/Me/profolio/src/locales/en/translation.json): English strings
+- [src/locales/zh-HK/translation.json](/Users/jason/Github/Me/profolio/src/locales/zh-HK/translation.json): Traditional Chinese strings
 
 ## Working Rules
 
@@ -73,15 +70,15 @@ Key interactive behaviors:
 - Avoid adding loud colors, playful UI, or default-component-library styling.
 - Motion should feel deliberate and calm, not busy.
 - New sections or cards should match the current typography, spacing, border radius, and glass treatment.
+- Prefer Tailwind utilities in component markup for layout, spacing, typography, and responsive behavior.
+- Keep custom CSS thin and reserved for global theme tokens, pseudo-elements, canvas layering, and animation states.
 
 ### Canvas Rules
 
-- Keep the starfield logic modular inside `StarfieldCanvas.tsx` unless a clear extraction point appears.
+- Keep the aurora logic modular inside `StarfieldCanvas.tsx` unless a clear extraction point appears.
 - Preserve `requestAnimationFrame` rendering.
-- Do not introduce per-star expensive checks for constellation activation.
-- Group-level activation should remain based on constellation centers, not background-star scans.
-- Maintain mobile-friendly particle counts.
-- Preserve smooth opacity interpolation behavior for zodiac elements.
+- Keep per-frame work bounded for mobile responsiveness.
+- Preserve hover-driven brightening and bending without introducing visibly jittery motion.
 
 ### i18n Rules
 
@@ -94,7 +91,7 @@ Key interactive behaviors:
 
 - Support all three modes: `system`, `light`, `dark`.
 - Keep theme values tokenized in CSS custom properties.
-- Do not hardcode colors directly in component markup unless unavoidable for canvas rendering.
+- When using Tailwind classes, reference theme tokens through CSS variables instead of hardcoded one-off colors where practical.
 
 ## Quality Requirements
 
@@ -129,6 +126,7 @@ From the repo root:
 - Do not add unused starter assets or template code.
 - Remove dead code when replacing behavior.
 - Keep files UTF-8 and formatting compliant with Vite+ tooling.
+- Do not move large amounts of presentational styling back into ad hoc plain CSS if Tailwind utilities can express it cleanly.
 
 ## Definition of Done
 

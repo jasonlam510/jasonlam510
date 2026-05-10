@@ -6,7 +6,7 @@ type IconGlyphProps = {
 
 export function IconGlyph({ children }: IconGlyphProps) {
   return (
-    <span aria-hidden="true" className="icon-glyph">
+    <span aria-hidden="true" className="text-base leading-none">
       {children}
     </span>
   );
