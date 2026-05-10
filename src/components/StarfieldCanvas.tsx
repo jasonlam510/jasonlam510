@@ -1,60 +1,232 @@
 import { useEffect, useRef } from "react";
-import { useTranslation } from "react-i18next";
-import { ZODIAC_CONSTELLATIONS } from "../data/zodiac";
-
-const CONFIG = {
-  activeOpacity: 1,
-  ambientOpacity: 0.2,
-  baseVelocity: 0.18,
-  damping: 0.95,
-  desktopStars: 200,
-  glowBlur: 15,
-  interactionRadius: 150,
-  mobileStars: 110,
-  opacityLerp: 0.05,
-  parallaxStrength: 18,
-  zodiacRadius: 200,
-} as const;
 
 type StarfieldCanvasProps = {
   scrollElement: HTMLElement | null;
 };
 
-type AmbientStar = {
-  alpha: number;
-  driftX: number;
-  driftY: number;
-  originX: number;
-  originY: number;
-  radius: number;
-  vx: number;
-  vy: number;
-  x: number;
-  y: number;
-};
+const VERTEX_SHADER_SOURCE = `#version 300 es
+in vec2 aPosition;
 
-type ConstellationPoint = {
-  brightness: number;
-  currentOpacity: number;
-  radius: number;
-  targetOpacity: number;
-  x: number;
-  y: number;
-};
+void main() {
+  gl_Position = vec4(aPosition, 0.0, 1.0);
+}
+`;
 
-type ConstellationInstance = {
-  brightAnchor: ConstellationPoint;
-  center: { x: number; y: number };
-  connections: Array<[number, number]>;
-  currentOpacity: number;
-  label: string;
-  stars: ConstellationPoint[];
-  targetOpacity: number;
-};
+const FRAGMENT_SHADER_SOURCE = `#version 300 es
+precision highp float;
+
+uniform vec2 uResolution;
+uniform float uTime;
+uniform float uStarFocus;
+
+out vec4 fragColor;
+
+#define time uTime
+
+mat2 mm2(in float a) {
+  float c = cos(a);
+  float s = sin(a);
+  return mat2(c, s, -s, c);
+}
+
+mat2 m2 = mat2(0.95534, 0.29552, -0.29552, 0.95534);
+
+float tri(in float x) {
+  return clamp(abs(fract(x) - 0.5), 0.01, 0.49);
+}
+
+vec2 tri2(in vec2 p) {
+  return vec2(tri(p.x) + tri(p.y), tri(p.y + tri(p.x)));
+}
+
+float triNoise2d(in vec2 p, float spd) {
+  float z = 1.8;
+  float z2 = 2.5;
+  float rz = 0.0;
+  p *= mm2(p.x * 0.06);
+  vec2 bp = p;
+
+  for (float i = 0.0; i < 5.0; i++) {
+    vec2 dg = tri2(bp * 1.85) * 0.75;
+    dg *= mm2(time * spd);
+    p -= dg / z2;
+
+    bp *= 1.3;
+    z2 *= 0.45;
+    z *= 0.42;
+    p *= 1.21 + (rz - 1.0) * 0.02;
+
+    rz += tri(p.x + tri(p.y)) * z;
+    p *= -m2;
+  }
+
+  return clamp(1.0 / pow(rz * 29.0, 1.3), 0.0, 0.55);
+}
+
+float hash21(in vec2 n) {
+  return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);
+}
+
+vec4 aurora(vec3 ro, vec3 rd, vec2 fragCoord) {
+  vec4 col = vec4(0.0);
+  vec4 avgCol = vec4(0.0);
+
+  for (float i = 0.0; i < 50.0; i++) {
+    float of = 0.006 * hash21(fragCoord.xy) * smoothstep(0.0, 15.0, i);
+    float pt = ((0.8 + pow(i, 1.4) * 0.002) - ro.y) / (rd.y * 2.0 + 0.4);
+    pt -= of;
+    vec3 bpos = ro + pt * rd;
+    vec2 p = bpos.zx;
+    float rzt = triNoise2d(p, 0.12);
+    vec4 col2 = vec4(0.0, 0.0, 0.0, rzt);
+    col2.rgb = (sin(1.0 - vec3(2.15, -0.5, 1.2) + i * 0.043) * 0.5 + 0.5) * rzt;
+    avgCol = mix(avgCol, col2, 0.5);
+    col += avgCol * exp2(-i * 0.065 - 2.5) * smoothstep(0.0, 5.0, i);
+  }
+
+  col *= clamp(rd.y * 15.0 + 0.4, 0.0, 1.0);
+  return col * 1.8;
+}
+
+vec3 nmzHash33(vec3 q) {
+  uvec3 p = uvec3(ivec3(q));
+  p = p * uvec3(374761393U, 1103515245U, 668265263U) + p.zxy + p.yzx;
+  p = p.yzx * (p.zxy ^ (p >> 3U));
+  return vec3(p ^ (p >> 16U)) * (1.0 / vec3(0xffffffffU));
+}
+
+vec3 stars(in vec3 p, float starFocus) {
+  vec3 c = vec3(0.0);
+  float res = uResolution.x;
+  float starRadius = mix(0.72, 0.22, starFocus);
+
+  for (float i = 0.0; i < 4.0; i++) {
+    vec3 q = fract(p * (0.15 * res)) - 0.5;
+    vec3 id = floor(p * (0.15 * res));
+    vec2 rn = nmzHash33(id).xy;
+    float c2 = 1.0 - smoothstep(0.0, starRadius, length(q));
+    c2 *= step(rn.x, 0.003 + i * i * 0.0025);
+    c += c2 * (mix(vec3(1.0, 0.49, 0.1), vec3(0.75, 0.9, 1.0), rn.y) * 0.1 + 0.9);
+    p *= 1.3;
+  }
+
+  float sharpenBoost = mix(1.15, 2.0, starFocus);
+  return c * c * sharpenBoost;
+}
+
+vec3 bg(in vec3 rd) {
+  float sd = dot(normalize(vec3(-0.5, -0.6, 0.9)), rd) * 0.5 + 0.5;
+  sd = pow(sd, 5.0);
+  vec3 col = mix(vec3(0.05, 0.1, 0.2), vec3(0.1, 0.05, 0.2), sd);
+  return col * 0.63;
+}
+
+void main() {
+  vec2 fragCoord = gl_FragCoord.xy;
+  vec2 q = fragCoord / uResolution.xy;
+  vec2 p = q - 0.5;
+  p.x *= uResolution.x / uResolution.y;
+  float localStarFocus = uStarFocus;
+
+  vec3 ro = vec3(0.0, 0.0, -6.7);
+  vec3 rd = normalize(vec3(p, 1.3));
+
+  rd.yz *= mm2(0.1);
+  rd.xz *= mm2(-0.1);
+
+  vec3 col = vec3(0.0);
+  vec3 brd = rd;
+  float fade = smoothstep(0.0, 0.01, abs(brd.y)) * 0.1 + 0.9;
+
+  col = bg(rd) * fade;
+
+  if (rd.y > 0.0) {
+    vec4 aur = smoothstep(0.0, 1.5, aurora(ro, rd, fragCoord)) * fade;
+    vec3 starCol = stars(rd, localStarFocus);
+    col = col * (1.0 - aur.a) + aur.rgb;
+    col += starCol * (0.45 + 0.95 * localStarFocus);
+  } else {
+    rd.y = abs(rd.y);
+    col = bg(rd) * fade * 0.6;
+    vec4 aur = smoothstep(0.0, 2.5, aurora(ro, rd, fragCoord));
+    vec3 starCol = stars(rd, localStarFocus);
+    col = col * (1.0 - aur.a) + aur.rgb;
+    col += starCol * (0.1 + 0.16 * localStarFocus);
+    vec3 pos = ro + ((0.5 - ro.y) / rd.y) * rd;
+    float nz2 = triNoise2d(pos.xz * vec2(0.5, 0.7), 0.0);
+    col += mix(vec3(0.2, 0.25, 0.5) * 0.08, vec3(0.3, 0.3, 0.5) * 0.7, nz2 * 0.4);
+  }
+
+  fragColor = vec4(col, 1.0);
+}
+`;
+
+function createShader(
+  gl: WebGL2RenderingContext,
+  type: number,
+  source: string,
+): WebGLShader | null {
+  const shader = gl.createShader(type);
+
+  if (!shader) {
+    return null;
+  }
+
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+
+  if (gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    return shader;
+  }
+
+  gl.deleteShader(shader);
+  return null;
+}
+
+function createProgram(
+  gl: WebGL2RenderingContext,
+  vertexSource: string,
+  fragmentSource: string,
+): WebGLProgram | null {
+  const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexSource);
+  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
+
+  if (!vertexShader || !fragmentShader) {
+    if (vertexShader) {
+      gl.deleteShader(vertexShader);
+    }
+
+    if (fragmentShader) {
+      gl.deleteShader(fragmentShader);
+    }
+
+    return null;
+  }
+
+  const program = gl.createProgram();
+
+  if (!program) {
+    gl.deleteShader(vertexShader);
+    gl.deleteShader(fragmentShader);
+    return null;
+  }
+
+  gl.attachShader(program, vertexShader);
+  gl.attachShader(program, fragmentShader);
+  gl.linkProgram(program);
+  gl.deleteShader(vertexShader);
+  gl.deleteShader(fragmentShader);
+
+  if (gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    return program;
+  }
+
+  gl.deleteProgram(program);
+  return null;
+}
 
 export function StarfieldCanvas({ scrollElement }: StarfieldCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { i18n, t } = useTranslation();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -63,107 +235,73 @@ export function StarfieldCanvas({ scrollElement }: StarfieldCanvasProps) {
       return;
     }
 
-    const context = canvas.getContext("2d");
+    const gl = canvas.getContext("webgl2", {
+      alpha: true,
+      antialias: false,
+      depth: false,
+      powerPreference: "high-performance",
+      premultipliedAlpha: true,
+      stencil: false,
+    }) as WebGL2RenderingContext | null;
 
-    if (!context) {
+    if (!gl) {
       return;
     }
 
+    const webgl = gl;
+    const program = createProgram(webgl, VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
+
+    if (!program) {
+      return;
+    }
+
+    const positionLocation = webgl.getAttribLocation(program, "aPosition");
+    const resolutionLocation = webgl.getUniformLocation(program, "uResolution");
+    const timeLocation = webgl.getUniformLocation(program, "uTime");
+    const starFocusLocation = webgl.getUniformLocation(program, "uStarFocus");
+    const buffer = webgl.createBuffer();
+
+    if (
+      positionLocation === -1 ||
+      !resolutionLocation ||
+      !timeLocation ||
+      !starFocusLocation ||
+      !buffer
+    ) {
+      webgl.deleteProgram(program);
+      if (buffer) {
+        webgl.deleteBuffer(buffer);
+      }
+      return;
+    }
+
+    webgl.bindBuffer(webgl.ARRAY_BUFFER, buffer);
+    webgl.bufferData(
+      webgl.ARRAY_BUFFER,
+      new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]),
+      webgl.STATIC_DRAW,
+    );
+
+    webgl.useProgram(program);
+    webgl.enableVertexAttribArray(positionLocation);
+    webgl.vertexAttribPointer(positionLocation, 2, webgl.FLOAT, false, 0, 0);
+
     const canvasElement = canvas;
-    const drawingContext = context;
     const scroller = scrollElement;
-
     let animationFrame = 0;
-    let viewport = { width: window.innerWidth, height: window.innerHeight };
-    let ambientStars: AmbientStar[] = [];
-    let constellations: ConstellationInstance[] = [];
-    let pointer = {
-      active: false,
-      x: viewport.width / 2,
-      y: viewport.height / 2,
-    };
-    let parallaxTarget = { x: 0, y: 0 };
-    let parallaxCurrent = { x: 0, y: 0 };
-    const constellationLabels = {
-      gemini: t("constellations.gemini"),
-      leo: t("constellations.leo"),
-      taurus: t("constellations.taurus"),
-    };
-
-    function getStarCount() {
-      return viewport.width <= 768 ? CONFIG.mobileStars : CONFIG.desktopStars;
-    }
-
-    function createAmbientStars() {
-      ambientStars = Array.from({ length: getStarCount() }, () => {
-        const x = Math.random() * viewport.width;
-        const y = Math.random() * viewport.height;
-
-        return {
-          alpha: Math.random() * 0.42 + 0.24,
-          driftX: (Math.random() - 0.5) * 0.12,
-          driftY: (Math.random() - 0.5) * 0.12,
-          originX: x,
-          originY: y,
-          radius: Math.random() * 1.6 + 0.4,
-          vx: (Math.random() - 0.5) * CONFIG.baseVelocity,
-          vy: (Math.random() - 0.5) * CONFIG.baseVelocity,
-          x,
-          y,
-        };
-      });
-    }
-
-    function buildConstellations() {
-      constellations = Object.values(ZODIAC_CONSTELLATIONS).map((definition) => {
-        const stars = definition.stars.map((star) => ({
-          brightness: star.brightness,
-          currentOpacity: CONFIG.ambientOpacity,
-          radius: 1.7 + star.brightness * 1.9,
-          targetOpacity: CONFIG.ambientOpacity,
-          x: (definition.anchor.x + star.x * definition.scale.x) * viewport.width,
-          y: (definition.anchor.y + star.y * definition.scale.y) * viewport.height,
-        }));
-
-        const center = stars.reduce(
-          (accumulator, star) => ({
-            x: accumulator.x + star.x,
-            y: accumulator.y + star.y,
-          }),
-          { x: 0, y: 0 },
-        );
-
-        center.x /= stars.length;
-        center.y /= stars.length;
-
-        const brightAnchor = stars.reduce((brightest, star) =>
-          star.brightness > brightest.brightness ? star : brightest,
-        );
-
-        return {
-          brightAnchor,
-          center,
-          connections: definition.connections,
-          currentOpacity: CONFIG.ambientOpacity,
-          label: constellationLabels[definition.id],
-          stars,
-          targetOpacity: CONFIG.ambientOpacity,
-        };
-      });
-    }
+    let viewport = { height: window.innerHeight, width: window.innerWidth };
 
     function resizeCanvas() {
-      const ratio = Math.min(window.devicePixelRatio || 1, 2);
-      viewport = { width: window.innerWidth, height: window.innerHeight };
+      const ratio = window.devicePixelRatio || 2;
+      viewport = { height: window.innerHeight, width: window.innerWidth };
 
-      canvasElement.width = viewport.width * ratio;
-      canvasElement.height = viewport.height * ratio;
+      canvasElement.width = Math.round(viewport.width * ratio);
+      canvasElement.height = Math.round(viewport.height * ratio);
       canvasElement.style.width = `${viewport.width}px`;
       canvasElement.style.height = `${viewport.height}px`;
 
-      drawingContext.setTransform(ratio, 0, 0, ratio, 0, 0);
-      createAmbientStars();
-      buildConstellations();
+      webgl.viewport(0, 0, canvasElement.width, canvasElement.height);
+      webgl.uniform2f(resolutionLocation, canvasElement.width, canvasElement.height);
       updateHeroFade();
     }
 
@@ -179,180 +317,33 @@ export function StarfieldCanvas({ scrollElement }: StarfieldCanvasProps) {
       canvasElement.style.opacity = `${1 - progress}`;
     }
 
-    function updateParallaxFromScroll() {
-      const maxScroll = Math.max(scroller.scrollHeight - viewport.height, 1);
-      const scrollProgress = scroller.scrollTop / maxScroll;
-      parallaxTarget.y = (scrollProgress - 0.5) * CONFIG.parallaxStrength * 1.4;
-    }
-
-    function updateAmbientStars() {
-      ambientStars.forEach((star) => {
-        const dx = star.x - pointer.x;
-        const dy = star.y - pointer.y;
-        const distance = Math.hypot(dx, dy);
-
-        if (pointer.active && distance < CONFIG.interactionRadius && distance > 0) {
-          const force = (CONFIG.interactionRadius - distance) / CONFIG.interactionRadius;
-          star.vx += (dx / distance) * force * 1.8;
-          star.vy += (dy / distance) * force * 1.8;
-        }
-
-        const homeX = (star.originX - star.x) * 0.004;
-        const homeY = (star.originY - star.y) * 0.004;
-
-        star.vx = (star.vx + homeX + star.driftX * 0.015) * CONFIG.damping;
-        star.vy = (star.vy + homeY + star.driftY * 0.015) * CONFIG.damping;
-        star.x += star.vx;
-        star.y += star.vy;
-
-        drawingContext.beginPath();
-        drawingContext.arc(
-          star.x + parallaxCurrent.x,
-          star.y + parallaxCurrent.y,
-          star.radius,
-          0,
-          Math.PI * 2,
-        );
-        drawingContext.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
-        drawingContext.fill();
-      });
-    }
-
-    function updateConstellationStates() {
-      constellations.forEach((constellation) => {
-        const distance = Math.hypot(
-          pointer.x - constellation.center.x,
-          pointer.y - constellation.center.y,
-        );
-        const isActive = pointer.active && distance <= CONFIG.zodiacRadius;
-        constellation.targetOpacity = isActive ? CONFIG.activeOpacity : CONFIG.ambientOpacity;
-        constellation.currentOpacity +=
-          (constellation.targetOpacity - constellation.currentOpacity) * CONFIG.opacityLerp;
-
-        constellation.stars.forEach((star) => {
-          star.targetOpacity = constellation.targetOpacity;
-          star.currentOpacity += (star.targetOpacity - star.currentOpacity) * CONFIG.opacityLerp;
-        });
-      });
-    }
-
-    function drawConstellations() {
-      drawingContext.save();
-      drawingContext.font = '500 12px "Inter", system-ui, sans-serif';
-      drawingContext.textBaseline = "middle";
-
-      constellations.forEach((constellation) => {
-        drawingContext.save();
-
-        if (constellation.currentOpacity > 0.45) {
-          drawingContext.shadowBlur = CONFIG.glowBlur;
-          drawingContext.shadowColor = "rgba(154, 206, 255, 0.8)";
-        }
-
-        drawingContext.lineWidth = 1.15;
-        drawingContext.strokeStyle = `rgba(186, 223, 255, ${constellation.currentOpacity})`;
-
-        constellation.connections.forEach(([fromIndex, toIndex]) => {
-          const from = constellation.stars[fromIndex];
-          const to = constellation.stars[toIndex];
-
-          drawingContext.beginPath();
-          drawingContext.moveTo(from.x + parallaxCurrent.x, from.y + parallaxCurrent.y);
-          drawingContext.lineTo(to.x + parallaxCurrent.x, to.y + parallaxCurrent.y);
-          drawingContext.stroke();
-        });
-
-        constellation.stars.forEach((star) => {
-          drawingContext.beginPath();
-          drawingContext.arc(
-            star.x + parallaxCurrent.x,
-            star.y + parallaxCurrent.y,
-            star.radius,
-            0,
-            Math.PI * 2,
-          );
-          drawingContext.fillStyle = `rgba(255, 255, 255, ${star.currentOpacity})`;
-          drawingContext.fill();
-        });
-
-        if (constellation.currentOpacity > 0.8) {
-          const labelOpacity = (constellation.currentOpacity - 0.8) / 0.2;
-          drawingContext.fillStyle = `rgba(227, 236, 255, ${labelOpacity})`;
-          drawingContext.fillText(
-            constellation.label,
-            constellation.brightAnchor.x + parallaxCurrent.x + 14,
-            constellation.brightAnchor.y + parallaxCurrent.y - 14,
-          );
-        }
-
-        drawingContext.restore();
-      });
-
-      drawingContext.restore();
-    }
-
-    function renderFrame() {
-      parallaxCurrent.x += (parallaxTarget.x - parallaxCurrent.x) * 0.06;
-      parallaxCurrent.y += (parallaxTarget.y - parallaxCurrent.y) * 0.06;
-
-      drawingContext.clearRect(0, 0, viewport.width, viewport.height);
-      updateAmbientStars();
-      updateConstellationStates();
-      drawConstellations();
+    function renderFrame(timestamp: number) {
+      webgl.uniform1f(timeLocation, timestamp * 0.001);
+      webgl.uniform1f(starFocusLocation, 0.18);
+      webgl.drawArrays(webgl.TRIANGLES, 0, 6);
 
       animationFrame = window.requestAnimationFrame(renderFrame);
     }
 
-    function handlePointerMove(event: PointerEvent) {
-      pointer = {
-        active: true,
-        x: event.clientX,
-        y: event.clientY,
-      };
-    }
-
-    function handlePointerLeave() {
-      pointer = {
-        ...pointer,
-        active: false,
-      };
-    }
-
-    function handleDeviceOrientation(event: DeviceOrientationEvent) {
-      const gamma = event.gamma || 0;
-      const beta = event.beta || 0;
-      parallaxTarget.x = (gamma / 45) * CONFIG.parallaxStrength;
-      parallaxTarget.y = (beta / 45) * (CONFIG.parallaxStrength * 0.7);
-    }
-
     function handleScroll() {
-      updateParallaxFromScroll();
       updateHeroFade();
     }
 
     resizeCanvas();
-    updateParallaxFromScroll();
 
     window.addEventListener("resize", resizeCanvas);
-    window.addEventListener("pointermove", handlePointerMove, { passive: true });
-    window.addEventListener("pointerleave", handlePointerLeave);
     scroller.addEventListener("scroll", handleScroll, { passive: true });
 
-    if ("DeviceOrientationEvent" in window) {
-      window.addEventListener("deviceorientation", handleDeviceOrientation, { passive: true });
-    }
-
-    renderFrame();
+    animationFrame = window.requestAnimationFrame(renderFrame);
 
     return () => {
       window.cancelAnimationFrame(animationFrame);
       window.removeEventListener("resize", resizeCanvas);
-      window.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("pointerleave", handlePointerLeave);
-      window.removeEventListener("deviceorientation", handleDeviceOrientation);
       scroller.removeEventListener("scroll", handleScroll);
+      webgl.deleteBuffer(buffer);
+      webgl.deleteProgram(program);
     };
-  }, [i18n.resolvedLanguage, scrollElement, t]);
+  }, [scrollElement]);
 
   return <canvas aria-hidden="true" className="starfield" ref={canvasRef} />;
 }
