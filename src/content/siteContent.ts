@@ -28,15 +28,15 @@ export const siteContent = {
     },
   },
   hero: {
-    description:
-      "A premium, single-page portfolio with a shimmering aurora canvas, reactive hover motion, and documented dark or light theming built on a Vite+ workflow.",
-    eyebrow: "Creative Frontend Engineer",
+    description: "I built this site with <3. Hover or drag across the sky to bring it to life.",
+    eyebrow: "Lam Ching Hoi, Jason",
     meta: {
       location: "Hong Kong / Remote",
-      prompt: "Hover across the sky to bring the stars into sharper focus.",
-      stack: "React, Canvas, Tailwind, Vite+",
+      role: "Full-stack developer",
+      sourceHref: "https://github.com/jasonlam510/portfolio",
+      sourceLabel: "Source code on GitHub",
     },
-    title: "A cinematic personal portfolio under a living aurora.",
+    title: "My portfolio",
   },
   projects: {
     cards: {

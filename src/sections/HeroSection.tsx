@@ -28,19 +28,26 @@ export function HeroSection({ onToggleTheme, resolvedTheme }: HeroSectionProps) 
 
         <div className="max-w-[980px]">
           <h1
-            className={`m-0 max-w-[11ch] text-[clamp(3rem,9vw,8rem)] font-extrabold leading-[0.92] tracking-[-0.05em] ${revealClass}`}
+            className={`m-0 max-w-[11ch] text-[clamp(3rem,9vw,8rem)] font-extrabold leading-[0.92] ${revealClass}`}
           >
             {siteContent.hero.title}
           </h1>
           <p className={`mt-[1.8rem] max-w-[44rem] ${bodyTextClass} ${revealClass}`}>
-            {siteContent.hero.description}
+            {siteContent.hero.description}{" "}
+            <a
+              className="text-text-primary underline decoration-[var(--color-text-muted)] underline-offset-4 transition-colors duration-180 hover:text-text-muted"
+              href={siteContent.hero.meta.sourceHref}
+              rel="noreferrer"
+              target="_blank"
+            >
+              {siteContent.hero.meta.sourceLabel}
+            </a>
           </p>
           <div
             className={`mt-8 flex flex-wrap gap-x-6 gap-y-[0.85rem] text-[0.94rem] text-[color-mix(in_srgb,var(--color-text-primary)_84%,transparent)] ${revealClass}`}
           >
             <span>{siteContent.hero.meta.location}</span>
-            <span>{siteContent.hero.meta.stack}</span>
-            <span>{siteContent.hero.meta.prompt}</span>
+            <span>{siteContent.hero.meta.role}</span>
           </div>
         </div>
       </div>
