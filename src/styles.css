@@ -1,8 +1,16 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Borna";
+  src: url("../assets/borna-medium-webfont.woff") format("woff");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
 @theme {
-  --font-sans: "Inter", system-ui, sans-serif;
+  --font-sans: "Borna", "Inter", system-ui, sans-serif;
   --color-canvas-bg: var(--app-background);
   --color-surface-elevated: var(--app-background-elevated);
   --color-surface-panel: var(--app-background-panel);
@@ -61,6 +69,7 @@
 
   body {
     margin: 0;
+    font-family: var(--font-sans);
     background:
       radial-gradient(circle at top, rgba(109, 130, 171, 0.18), transparent 30%),
       var(--color-canvas-bg);
