@@ -2,12 +2,17 @@ export const siteContent = {
   about: {
     body: {
       first:
-        "This portfolio blends Apple-style restraint with the hidden-structure logic of premium data products. The field looks ambient at first, then reveals grouped intelligence only when the cursor enters the right orbit.",
-      second:
-        "Under the surface, the canvas keeps background particles separate from zodiac state, so discovery stays smooth while opacity, glow, and labeling transition with deliberate pacing.",
+        "I’m a passionate final-year Computer Science student at CityU. I started programming before university with Casio BASIC, Pascal, and VBA, and I’ve been building useful things ever since.",
+      second: "What makes me:",
     },
-    eyebrow: "Profile",
-    title: "Built like a product system, staged like a private observatory.",
+    eyebrow: "About me",
+    facts: [
+      "CityU CS '26",
+      "Exchange @ KTH '25",
+      "Loves hacking and handcrafting almost everything",
+      "Interested in multithreading and distributed systems",
+      "Focusing on full-stack development currently",
+    ],
   },
   contact: {
     emailLabel: "Email",
