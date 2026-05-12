@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { STARFIELD_CANVAS_CONFIG, getStarfieldRenderPixelRatio } from "../config/starfield";
 
 type StarfieldCanvasProps = {
   scrollElement: HTMLElement | null;
@@ -45,10 +46,11 @@ float triNoise2d(in vec2 p, float spd) {
   float rz = 0.0;
   p *= mm2(p.x * 0.06);
   vec2 bp = p;
+  mat2 noiseSpin = mm2(time * spd);
 
-  for (float i = 0.0; i < 5.0; i++) {
+  for (float i = 0.0; i < 4.0; i++) {
     vec2 dg = tri2(bp * 1.85) * 0.75;
-    dg *= mm2(time * spd);
+    dg *= noiseSpin;
     p -= dg / z2;
 
     bp *= 1.3;
@@ -71,7 +73,7 @@ vec4 aurora(vec3 ro, vec3 rd, vec2 fragCoord) {
   vec4 col = vec4(0.0);
   vec4 avgCol = vec4(0.0);
 
-  for (float i = 0.0; i < 50.0; i++) {
+  for (float i = 0.0; i < 34.0; i++) {
     float of = 0.006 * hash21(fragCoord.xy) * smoothstep(0.0, 15.0, i);
     float pt = ((0.8 + pow(i, 1.4) * 0.002) - ro.y) / (rd.y * 2.0 + 0.4);
     pt -= of;
@@ -161,6 +163,8 @@ void main() {
 }
 `;
 
+const FRAME_INTERVAL_TOLERANCE_MS = 1;
+
 function createShader(
   gl: WebGL2RenderingContext,
   type: number,
@@ -236,11 +240,13 @@ export function StarfieldCanvas({ scrollElement }: StarfieldCanvasProps) {
     }
 
     const gl = canvas.getContext("webgl2", {
-      alpha: true,
+      alpha: false,
       antialias: false,
       depth: false,
+      failIfMajorPerformanceCaveat: false,
       powerPreference: "high-performance",
-      premultipliedAlpha: true,
+      premultipliedAlpha: false,
+      preserveDrawingBuffer: false,
       stencil: false,
     }) as WebGL2RenderingContext | null;
 
@@ -285,61 +291,155 @@ export function StarfieldCanvas({ scrollElement }: StarfieldCanvasProps) {
     webgl.useProgram(program);
     webgl.enableVertexAttribArray(positionLocation);
     webgl.vertexAttribPointer(positionLocation, 2, webgl.FLOAT, false, 0, 0);
+    webgl.uniform1f(starFocusLocation, 0.18);
 
     const canvasElement = canvas;
     const scroller = scrollElement;
-    let animationFrame = 0;
+    let animationFrame: number | null = null;
+    let scrollFadeFrame: number | null = null;
+    let documentVisible = document.visibilityState === "visible";
+    let fadeDistance = 1;
+    const frameInterval = STARFIELD_CANVAS_CONFIG.targetFrameIntervalMs;
+    let isCanvasVisible = true;
+    let lastOpacity = -1;
+    let lastRenderTime = 0;
     let viewport = { height: window.innerHeight, width: window.innerWidth };
 
     function resizeCanvas() {
-      const ratio = window.devicePixelRatio || 2;
       viewport = { height: window.innerHeight, width: window.innerWidth };
+      const ratio = getStarfieldRenderPixelRatio();
+      const displayWidth = Math.max(1, Math.round(viewport.width));
+      const displayHeight = Math.max(1, Math.round(viewport.height));
+      const renderWidth = Math.max(1, Math.round(displayWidth * ratio));
+      const renderHeight = Math.max(1, Math.round(displayHeight * ratio));
+      const styleWidth = `${displayWidth}px`;
+      const styleHeight = `${displayHeight}px`;
 
-      canvasElement.width = Math.round(viewport.width * ratio);
-      canvasElement.height = Math.round(viewport.height * ratio);
-      canvasElement.style.width = `${viewport.width}px`;
-      canvasElement.style.height = `${viewport.height}px`;
+      if (canvasElement.width !== renderWidth || canvasElement.height !== renderHeight) {
+        canvasElement.width = renderWidth;
+        canvasElement.height = renderHeight;
+        webgl.viewport(0, 0, renderWidth, renderHeight);
+        webgl.uniform2f(resolutionLocation, renderWidth, renderHeight);
+      }
 
-      webgl.viewport(0, 0, canvasElement.width, canvasElement.height);
-      webgl.uniform2f(resolutionLocation, canvasElement.width, canvasElement.height);
+      if (canvasElement.style.width !== styleWidth) {
+        canvasElement.style.width = styleWidth;
+      }
+
+      if (canvasElement.style.height !== styleHeight) {
+        canvasElement.style.height = styleHeight;
+      }
+
+      updateFadeDistance();
       updateHeroFade();
+      lastRenderTime = 0;
+      scheduleRender();
+    }
+
+    function updateFadeDistance() {
+      const aboutSection = document.getElementById("about");
+      fadeDistance = Math.max(
+        ((aboutSection && aboutSection.offsetTop) || viewport.height) * 0.65,
+        1,
+      );
     }
 
     function updateHeroFade() {
-      const aboutSection = document.getElementById("about");
+      const progress = Math.min(scroller.scrollTop / fadeDistance, 1);
+      const opacity = Math.max(0, 1 - progress);
+      const wasCanvasVisible = isCanvasVisible;
 
-      if (!aboutSection) {
-        return;
+      if (Math.abs(opacity - lastOpacity) > 0.005) {
+        canvasElement.style.opacity = opacity.toFixed(3);
+        lastOpacity = opacity;
       }
 
-      const fadeDistance = aboutSection.offsetTop * 0.65;
-      const progress = Math.min(scroller.scrollTop / Math.max(fadeDistance, 1), 1);
-      canvasElement.style.opacity = `${1 - progress}`;
+      isCanvasVisible = opacity > STARFIELD_CANVAS_CONFIG.minRenderOpacity;
+
+      if (wasCanvasVisible && !isCanvasVisible && animationFrame !== null) {
+        window.cancelAnimationFrame(animationFrame);
+        animationFrame = null;
+      }
+
+      if (!wasCanvasVisible && isCanvasVisible) {
+        lastRenderTime = 0;
+        scheduleRender();
+      }
     }
 
-    function renderFrame(timestamp: number) {
-      webgl.uniform1f(timeLocation, timestamp * 0.001);
-      webgl.uniform1f(starFocusLocation, 0.18);
-      webgl.drawArrays(webgl.TRIANGLES, 0, 6);
+    function scheduleRender() {
+      if (animationFrame !== null || !documentVisible || !isCanvasVisible) {
+        return;
+      }
 
       animationFrame = window.requestAnimationFrame(renderFrame);
     }
 
+    function renderFrame(timestamp: number) {
+      animationFrame = null;
+
+      if (!documentVisible || !isCanvasVisible) {
+        return;
+      }
+
+      if (
+        lastRenderTime === 0 ||
+        timestamp - lastRenderTime >= frameInterval - FRAME_INTERVAL_TOLERANCE_MS
+      ) {
+        lastRenderTime = timestamp;
+        webgl.uniform1f(timeLocation, timestamp * 0.001);
+        webgl.drawArrays(webgl.TRIANGLES, 0, 6);
+      }
+
+      scheduleRender();
+    }
+
     function handleScroll() {
-      updateHeroFade();
+      if (scrollFadeFrame !== null) {
+        return;
+      }
+
+      scrollFadeFrame = window.requestAnimationFrame(() => {
+        scrollFadeFrame = null;
+        updateHeroFade();
+      });
+    }
+
+    function handleVisibilityChange() {
+      documentVisible = document.visibilityState === "visible";
+
+      if (!documentVisible && animationFrame !== null) {
+        window.cancelAnimationFrame(animationFrame);
+        animationFrame = null;
+        return;
+      }
+
+      if (documentVisible) {
+        lastRenderTime = 0;
+        scheduleRender();
+      }
     }
 
     resizeCanvas();
 
     window.addEventListener("resize", resizeCanvas);
     scroller.addEventListener("scroll", handleScroll, { passive: true });
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    animationFrame = window.requestAnimationFrame(renderFrame);
+    scheduleRender();
 
     return () => {
-      window.cancelAnimationFrame(animationFrame);
+      if (animationFrame !== null) {
+        window.cancelAnimationFrame(animationFrame);
+      }
+
+      if (scrollFadeFrame !== null) {
+        window.cancelAnimationFrame(scrollFadeFrame);
+      }
+
       window.removeEventListener("resize", resizeCanvas);
       scroller.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       webgl.deleteBuffer(buffer);
       webgl.deleteProgram(program);
     };
