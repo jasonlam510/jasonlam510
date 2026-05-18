@@ -5,6 +5,7 @@ import { AboutSection } from "./sections/AboutSection";
 import { ContactSection } from "./sections/ContactSection";
 import { HeroSection } from "./sections/HeroSection";
 import { ProjectsSection } from "./sections/ProjectsSection";
+import { WorkExperienceSection } from "./sections/WorkExperienceSection";
 
 function App() {
   const snapContainerRef = useRef<HTMLElement | null>(null);
@@ -50,6 +51,7 @@ function App() {
       >
         <HeroSection onToggleTheme={toggleTheme} resolvedTheme={resolvedTheme} />
         <AboutSection />
+        <WorkExperienceSection />
         <ProjectsSection />
         <ContactSection />
       </main>

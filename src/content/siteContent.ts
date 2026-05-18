@@ -43,6 +43,41 @@ export const siteContent = {
     },
     title: "My portfolio",
   },
+  workExperience: {
+    eyebrow: "Work Experience",
+    title: "Companies where I learned to build and ship:)",
+    items: [
+      {
+        company: "Oursky Limited",
+        description:
+          "Worked on two full-stack projects: one as part of a team, and another built from scratch in a small setup with just the PM and me.",
+        iconAlt: "Oursky logo",
+        iconKey: "oursky",
+        period: "Dec 2025 — Mar 2026",
+        role: "Part-time Software Engineer",
+        tags: ["Ruby on Rails", "PostgreSQL", "Redis", "Vite", "K8s", "GCP"],
+      },
+      {
+        company: "Dating App Startup",
+        description:
+          "Took full ownership of the backend, designing and building the architecture from scratch.",
+        emoji: "🚗",
+        period: "Dec 2024 — Jan 2025",
+        role: "Freelance Software Engineer",
+        tags: ["FastAPI", "S3", "EC2", "Lambda", "RDS", "API Gateway"],
+      },
+      {
+        company: "Hospital Authority",
+        description:
+          "I helped to build internal tools for my team",
+        iconAlt: "Hospital Authority logo",
+        iconKey: "hospitalAuthority",
+        period: "Jul 2023 — Jul 2024",
+        role: "Temporary Student Programmer",
+        tags: ["Grafana", "InfluxDB", "Selenium"],
+      },
+    ],
+  },
   projects: {
     cards: {
       designEngine: {
