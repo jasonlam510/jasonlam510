@@ -41,7 +41,7 @@ export const siteContent = {
       sourceHref: "https://github.com/jasonlam510/portfolio",
       sourceLabel: "Source code on GitHub",
     },
-    title: "My portfolio",
+    title: "Welcome to Jason’s portfolio.",
   },
   workExperience: {
     eyebrow: "Work Experience",
