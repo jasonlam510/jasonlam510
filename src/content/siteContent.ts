@@ -1,11 +1,11 @@
 export const siteContent = {
   about: {
     body: {
-      first:
-        "I’m a passionate final-year Computer Science student at CityU. I started programming before university with Casio BASIC, Pascal, and VBA, and I’ve been building useful things ever since.",
       second: "What makes me:",
     },
     eyebrow: "About me",
+    title:
+      "I’m a passionate final-year Computer Science student at CityU. I started programming before university with Casio BASIC, Pascal, and VBA, and I’ve been building useful things ever since.",
     facts: [
       "CityU CS '26",
       "Exchange @ KTH '25",
