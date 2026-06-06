@@ -73,12 +73,8 @@ What made me:
 
 ## Interests
 
-I'm using AI as a lecturer for these topics, since these electives have not been offered at CityU in recent years;(
-
-- Computer Architecture
-- Distributed Systems
-- High Speed Multimedia Networks
-- Advanced Software Design
+- Cooking: Being a chef was one of my dream jobs when I was young. I have been cooking dinner for my family since I was 15 ~~because my parents' cooking was so bad.~~
+- Music: I've been learning piano and flute since I was young, and I've played flute in a woodwind band for many years.
 
 ## What I've Hacked
 
@@ -90,4 +86,4 @@ I enjoy taking systems apart to understand how they work, mostly through securit
 
 ## Fun Fact
 
-I use AI to draft my resume in LaTeX, then push with the compiled PDF to a private repo:)
+I designed and built a POS system in Excel with VBA to record inventory data during the 2019 Hong Kong Computer & Communications Festival. 
