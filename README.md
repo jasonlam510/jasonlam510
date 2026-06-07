@@ -80,10 +80,6 @@ What made me:
 ![Linear](https://img.shields.io/badge/Linear-5E6AD2?style=flat-square&logo=linear&logoColor=white)
 ![Postman](https://img.shields.io/badge/Postman-FF6C37?style=flat-square&logo=postman&logoColor=white)
 
-## Interests
-
-- Cooking: Being a chef was one of my dream jobs when I was young. I have been cooking dinner for my family since I was 15 ~~because my parents' cooking was so bad.~~
-- Music: I've been learning piano and flute since I was young, and I've played flute in a woodwind band for many years.
 
 ## What I've Hacked
 
