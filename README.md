@@ -9,9 +9,7 @@ I'm a final-year Computer Science student at City University of Hong Kong. I sta
 What made me:
 - CityU CS '26
 - Exchange @ KTH '25
-- Full-stack development
-- Multithreading and distributed systems
-- Hacking, reverse engineering, and handcrafting things from scratch
+- I always deep dive until I understand *how* something works — not just that it does
 
 ## Featured projects
 
