@@ -87,7 +87,7 @@ I enjoy taking systems apart to understand how they work, mostly through securit
 
 - CityU ID card systems: NFC, MIFARE
 - DRM workflows and protection mechanisms
-- Various Android APKs for internal protocols, app behavior, and hidden implementation details
+- Various Android APKs for system design and hidden implementation details
 
 ## Fun Fact
 
