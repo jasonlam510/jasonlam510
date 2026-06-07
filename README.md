@@ -13,6 +13,15 @@ What made me:
 - Multithreading and distributed systems
 - Hacking, reverse engineering, and handcrafting things from scratch
 
+## Featured projects
+
+| Project | Description | Technologies |
+| --- | --- | --- |
+| [CityU Hall Laundry Dashboard](https://github.com/jasonlam510/Cityu-Hall-Laundry-Status) | Responsive web dashboard to check laundry status at CityU student residence in real time | Plain HTML, JavaScript |
+| [WIP] [Scount](https://github.com/jasonlam510/Scount) | Expense tracking app combining features from Tricount and Smoney | Expo, PowerSync, Supabase |
+| [CityUID](https://github.com/jasonlam510/CityUID) | Flipper Zero app that read and display CityU ID card info | C, Flipper Zero |
+| [Northern Lights Detection](https://github.com/jasonlam510/CS4480grp8) | Big data course project comparing scaling strategies for distributed video processing — single-machine parallelism, HTCondor cluster jobs, and Spark on GCP Dataproc (HDFS + YARN) — to measure throughput when scaling out across a distributed cluster vs tuning parallelism on one machine | Apache Spark, HTCondor, GCP Dataproc |
+
 ## Skills
 
 **Programming Languages**  
